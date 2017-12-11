@@ -1,1 +1,4 @@
 images
+model
+*.npy
+*.pyc
