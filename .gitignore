@@ -2,4 +2,4 @@ images
 model
 *.npy
 *.pyc
-graphics
+.vscode
