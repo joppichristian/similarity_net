@@ -11,7 +11,7 @@ import matplotlib.patches as patches
 from sklearn.metrics import auc
 import time
 GPU_MEMORY = 1
-
+"""
 gpu_options = tf.GPUOptions( 
     per_process_gpu_memory_fraction = GPU_MEMORY, 
     allow_growth = True ) 
@@ -19,7 +19,7 @@ gpu_options = tf.GPUOptions(
 config = tf.ConfigProto( 
     device_count = { 'GPU': 1 }, 
     gpu_options = gpu_options )  
-
+"""
 def load_data(root_imgs,root_bbs):
     root = 'images/'
     imgs = []
@@ -80,14 +80,15 @@ def get_features(dataset,bbs,type_features):
     im_size = vgg.vgg_16.default_image_size
     features = []
     if type_features=='e':
-        i = 1
-        for img,bb in zip(dataset,bbs):
-            
-            print(i)
-            bb = bb['bb']
-            with tf.Graph().as_default():
+            network = tf.Graph()
+            with network.as_default():
+                img = tf.placeholder(tf.string)
+                bb_xmin = tf.placeholder(tf.int32)
+                bb_ymin = tf.placeholder(tf.int32)
+                bb_xmax = tf.placeholder(tf.int32)
+                bb_ymax = tf.placeholder(tf.int32)
                 im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
-                im = tf.image.crop_to_bounding_box(im_decode,bb['min_y'],bb['min_x'],bb['max_y']-bb['min_y'],bb['max_x']-bb['min_x'])
+                im = tf.image.crop_to_bounding_box(im_decode,bb_ymin,bb_xmin,bb_ymax-bb_ymin,bb_xmax-bb_xmin)
                 pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
                 pr_im  = tf.expand_dims(pr_im, 0)
                 
@@ -100,88 +101,29 @@ def get_features(dataset,bbs,type_features):
                 os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
                 slim.get_model_variables('vgg_16'))
 
-                with tf.Session() as sess:
-                    init_fn(sess)
-                    im_decode = sess.run(im_decode)
-                    im = sess.run(im)
-                    pr_im = sess.run(pr_im)
-                    logits = sess.run(logits)
-                logits = np.squeeze(np.asarray(logits))
-                features.append(logits)
-            tf.reset_default_graph()
-            i = i+1
-            np.save('tmp',features)
-            np.save('tmp_i',i)
+            with tf.Session(graph=network) as sess:
+                i = 1
+                init_fn(sess)
+                sess.run(tf.global_variables_initializer())
+                for img_p,bb in zip(dataset,bbs):   
+                    print(i)
+                    b = bb['bb']
+                    _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
+                    l = np.squeeze(np.asarray(l))
+                    features.append(l)
+                    i = i+1
+                    np.save('tmp',features)
+                    np.save('tmp_i',i)
     elif type_features=='i':
-        i = 1
-        for img,bb in zip(dataset,bbs):
-            
-            print(i)
-            bb_inside = bb['bb_inside']
-            bb = bb['bb']
-            with tf.Graph().as_default():
-                try:
-                    im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
-                    im = tf.image.crop_to_bounding_box(im_decode,bb_inside['min_y'],bb_inside['min_x'],bb_inside['max_y']-bb_inside['min_y'],bb_inside['max_x']-bb_inside['min_x'])
-                    pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
-                    pr_im  = tf.expand_dims(pr_im, 0)
-                    
-                    with slim.arg_scope(vgg.vgg_arg_scope()):
-                        logits, _ = vgg.vgg_16(pr_im,
-                                        num_classes=0,
-                                        is_training=False)
-                    
-                    init_fn = slim.assign_from_checkpoint_fn(
-                    os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
-                    slim.get_model_variables('vgg_16'))
-
-                    with tf.Session() as sess:
-                        init_fn(sess)
-                        im_decode = sess.run(im_decode)
-                        im = sess.run(im)
-                        pr_im = sess.run(pr_im)
-                        logits = sess.run(logits)
-                    logits = np.squeeze(np.asarray(logits))
-                    features.append(logits)
-                except:
-                    
-                    im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
-                    im = tf.image.crop_to_bounding_box(im_decode,bb['min_y'],bb['min_x'],bb['max_y']-bb['min_y'],bb['max_x']-bb['min_x'])
-                    pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
-                    pr_im  = tf.expand_dims(pr_im, 0)
-                    
-                    with slim.arg_scope(vgg.vgg_arg_scope()):
-                        logits, _ = vgg.vgg_16(pr_im,
-                                        num_classes=0,
-                                        is_training=False)
-                    
-                    init_fn = slim.assign_from_checkpoint_fn(
-                    os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
-                    slim.get_model_variables('vgg_16'))
-
-                    with tf.Session() as sess:
-                        init_fn(sess)
-                        im_decode = sess.run(im_decode)
-                        im = sess.run(im)
-                        pr_im = sess.run(pr_im)
-                        logits = sess.run(logits)
-                    logits = np.squeeze(np.asarray(logits))
-                    features.append(logits)
-            tf.reset_default_graph()
-            i = i+1
-            np.save('tmp',features)
-            np.save('tmp_i',i)
-    elif type_features == 'ie':
-        
-        i = 1
-        for img,bb in zip(dataset,bbs):
-            feat = []
-            print(i)
-            bb_inside = bb['bb_inside']
-            bb = bb['bb']
-            with tf.Graph().as_default():
+            network = tf.Graph()
+            with network.as_default():
+                img = tf.placeholder(tf.string)
+                bb_xmin = tf.placeholder(tf.int32)
+                bb_ymin = tf.placeholder(tf.int32)
+                bb_xmax = tf.placeholder(tf.int32)
+                bb_ymax = tf.placeholder(tf.int32)
                 im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
-                im = tf.image.crop_to_bounding_box(im_decode,bb['min_y'],bb['min_x'],bb['max_y']-bb['min_y'],bb['max_x']-bb['min_x'])
+                im = tf.image.crop_to_bounding_box(im_decode,bb_ymin,bb_xmin,bb_ymax-bb_ymin,bb_xmax-bb_xmin)
                 pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
                 pr_im  = tf.expand_dims(pr_im, 0)
                 
@@ -194,70 +136,72 @@ def get_features(dataset,bbs,type_features):
                 os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
                 slim.get_model_variables('vgg_16'))
 
-                with tf.Session() as sess:
-                    init_fn(sess)
-                    im_decode = sess.run(im_decode)
-                    im = sess.run(im)
-                    pr_im = sess.run(pr_im)
-                    logits = sess.run(logits)
+            with tf.Session(graph=network) as sess:
+                i = 1
+                init_fn(sess)
+                sess.run(tf.global_variables_initializer())
+                for img_p,bb in zip(dataset,bbs):   
+                    print(i)
+                    b_i = bb['bb_inside']
+                    b = bb['bb']
+                    try:
+                        _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b_i['min_x'],bb_ymin:b_i['min_y'],bb_xmax:b_i['max_x'],bb_ymax:b_i['max_y']})   
+                        l = np.squeeze(np.asarray(l))
+                        features.append(l)
+                    except:
+                        _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
+                        l = np.squeeze(np.asarray(l))
+                        features.append(l)
+                    i = i+1
+                    np.save('tmp',features)
+                    np.save('tmp_i',i)
+    elif type_features == 'ie':
+            network = tf.Graph()
+            with network.as_default():
+                img = tf.placeholder(tf.string)
+                bb_xmin = tf.placeholder(tf.int32)
+                bb_ymin = tf.placeholder(tf.int32)
+                bb_xmax = tf.placeholder(tf.int32)
+                bb_ymax = tf.placeholder(tf.int32)
+                im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
+                im = tf.image.crop_to_bounding_box(im_decode,bb_ymin,bb_xmin,bb_ymax-bb_ymin,bb_xmax-bb_xmin)
+                pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
+                pr_im  = tf.expand_dims(pr_im, 0)
                 
-                logits = np.squeeze(np.asarray(logits))
-                feat = list(logits)
-            tf.reset_default_graph()
-            with tf.Graph().as_default():
-                try:
-                    im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
-                    im = tf.image.crop_to_bounding_box(im_decode,bb_inside['min_y'],bb_inside['min_x'],bb_inside['max_y']-bb_inside['min_y'],bb_inside['max_x']-bb_inside['min_x'])
-                    pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
-                    pr_im  = tf.expand_dims(pr_im, 0)
-                    
-                    with slim.arg_scope(vgg.vgg_arg_scope()):
-                        logits, _ = vgg.vgg_16(pr_im,
-                                        num_classes=0,
-                                        is_training=False)
-                    
-                    init_fn = slim.assign_from_checkpoint_fn(
-                    os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
-                    slim.get_model_variables('vgg_16'))
+                with slim.arg_scope(vgg.vgg_arg_scope()):
+                    logits, _ = vgg.vgg_16(pr_im,
+                                    num_classes=0,
+                                    is_training=False)
+                
+                init_fn = slim.assign_from_checkpoint_fn(
+                os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
+                slim.get_model_variables('vgg_16'))
 
-                    with tf.Session() as sess:
-                        init_fn(sess)
-                        im_decode = sess.run(im_decode)
-                        im = sess.run(im)
-                        pr_im = sess.run(pr_im)
-                        logits = sess.run(logits)
-                    logits = np.squeeze(np.asarray(logits))
-                    feat = feat + list(logits)
-                except:
-                    print("errore")
-                    im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
-                    im = tf.image.crop_to_bounding_box(im_decode,bb['min_y'],bb['min_x'],bb['max_y']-bb['min_y'],bb['max_x']-bb['min_x'])
-                    pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
-                    pr_im  = tf.expand_dims(pr_im, 0)
-                    
-                    with slim.arg_scope(vgg.vgg_arg_scope()):
-                        logits, _ = vgg.vgg_16(pr_im,
-                                        num_classes=0,
-                                        is_training=False)
-                    
-                    init_fn = slim.assign_from_checkpoint_fn(
-                    os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
-                    slim.get_model_variables('vgg_16'))
-
-                    with tf.Session() as sess:
-                        init_fn(sess)
-                        im_decode = sess.run(im_decode)
-                        im = sess.run(im)
-                        pr_im = sess.run(pr_im)
-                        logits = sess.run(logits)
-                    logits = np.squeeze(np.asarray(logits))
-                    feat = feat + list(logits)
-            tf.reset_default_graph()
-            features.append(feat)
-            i = i+1
-            np.save('tmp',features)
-            np.save('tmp_i',i)
-    return features 
+            with tf.Session(graph=network) as sess:
+                i = 1
+                init_fn(sess)
+                sess.run(tf.global_variables_initializer())
+                for img_p,bb in zip(dataset,bbs):   
+                    print(i)
+                    b_i = bb['bb_inside']
+                    b = bb['bb']
+                    try:
+                        _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b_i['min_x'],bb_ymin:b_i['min_y'],bb_xmax:b_i['max_x'],bb_ymax:b_i['max_y']})   
+                        l = np.squeeze(np.asarray(l))
+                        feat = list(l)
+                    except:
+                        _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
+                        l = np.squeeze(np.asarray(l))
+                        feat = list(l)
+                
+                    _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
+                    l = np.squeeze(np.asarray(l))
+                    feat = feat+list(l)
+                    features.append(feat)
+                    i = i+1
+                    np.save('tmp',features)
+                    np.save('tmp_i',i)
+            return features 
 
 
 
