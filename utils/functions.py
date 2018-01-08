@@ -10,16 +10,8 @@ from preprocessing import vgg_preprocessing
 import matplotlib.patches as patches
 from sklearn.metrics import auc
 import time
-GPU_MEMORY = 1
-"""
-gpu_options = tf.GPUOptions( 
-    per_process_gpu_memory_fraction = GPU_MEMORY, 
-    allow_growth = True ) 
-    
-config = tf.ConfigProto( 
-    device_count = { 'GPU': 1 }, 
-    gpu_options = gpu_options )  
-"""
+
+
 def load_data(root_imgs,root_bbs):
     root = 'images/'
     imgs = []
@@ -103,10 +95,11 @@ def get_features(dataset,bbs,type_features):
 
             with tf.Session(graph=network) as sess:
                 i = 1
-                init_fn(sess)
                 sess.run(tf.global_variables_initializer())
+                init_fn(sess)
                 for img_p,bb in zip(dataset,bbs):   
                     print(i)
+                    init_fn(sess)
                     b = bb['bb']
                     _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
                     l = np.squeeze(np.asarray(l))
@@ -138,8 +131,8 @@ def get_features(dataset,bbs,type_features):
 
             with tf.Session(graph=network) as sess:
                 i = 1
-                init_fn(sess)
                 sess.run(tf.global_variables_initializer())
+                init_fn(sess)
                 for img_p,bb in zip(dataset,bbs):   
                     print(i)
                     b_i = bb['bb_inside']
@@ -178,26 +171,26 @@ def get_features(dataset,bbs,type_features):
                 slim.get_model_variables('vgg_16'))
 
             with tf.Session(graph=network) as sess:
-                i = 1
-                init_fn(sess)
+                i = 1       
                 sess.run(tf.global_variables_initializer())
+                init_fn(sess)
                 for img_p,bb in zip(dataset,bbs):   
                     print(i)
                     b_i = bb['bb_inside']
                     b = bb['bb']
+                    _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
+                    l = np.squeeze(np.asarray(l))
+                    feat = list(l)
+                    features.append(feat)
+                    print(feat[16],img_p)
                     try:
                         _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b_i['min_x'],bb_ymin:b_i['min_y'],bb_xmax:b_i['max_x'],bb_ymax:b_i['max_y']})   
                         l = np.squeeze(np.asarray(l))
-                        feat = list(l)
+                        feat = feat+ list(l)
                     except:
                         _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
                         l = np.squeeze(np.asarray(l))
-                        feat = list(l)
-                
-                    _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
-                    l = np.squeeze(np.asarray(l))
-                    feat = feat+list(l)
-                    features.append(feat)
+                        feat = feat + list(l)
                     i = i+1
                     np.save('tmp',features)
                     np.save('tmp_i',i)
