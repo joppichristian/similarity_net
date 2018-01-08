@@ -17,7 +17,7 @@ def load_data(root_imgs,root_bbs):
     imgs = []
     json_data = []
     to_download = []
-    for path, subdirs, files in os.walk(root_bbs):
+    """for path, subdirs, files in os.walk(root_bbs):
         for name in files:
             if 'NO_' not in name and '.json' in name:
                 dir_path = os.path.join(path.split('/')[3],path.split('/')[4],path.split('/')[5])
@@ -28,7 +28,7 @@ def load_data(root_imgs,root_bbs):
                     os.makedirs(root+dir_path)
                 copyfile(im_path,root+dir_path+'/'+name_img)
                 copyfile(json_path,root+dir_path+'/'+name)
-        
+    """    
     for path, subdirs, files in os.walk(root):
         for name in files:
             if '.jpg' in name:
