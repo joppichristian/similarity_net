@@ -17,7 +17,7 @@ def load_data(root_imgs,root_bbs):
     imgs = []
     json_data = []
     to_download = []
-    """for path, subdirs, files in os.walk(root_bbs):
+    for path, subdirs, files in os.walk(root_bbs):
         for name in files:
             if 'NO_' not in name and '.json' in name:
                 dir_path = os.path.join(path.split('/')[3],path.split('/')[4],path.split('/')[5])
@@ -27,8 +27,7 @@ def load_data(root_imgs,root_bbs):
                 if not os.path.exists(root+dir_path):
                     os.makedirs(root+dir_path)
                 copyfile(im_path,root+dir_path+'/'+name_img)
-                copyfile(json_path,root+dir_path+'/'+name)
-    """    
+                copyfile(json_path,root+dir_path+'/'+name)  
     for path, subdirs, files in os.walk(root):
         for name in files:
             if '.jpg' in name:
@@ -99,7 +98,6 @@ def get_features(dataset,bbs,type_features):
                 init_fn(sess)
                 for img_p,bb in zip(dataset,bbs):   
                     print(i)
-                    init_fn(sess)
                     b = bb['bb']
                     _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
                     l = np.squeeze(np.asarray(l))
@@ -107,6 +105,7 @@ def get_features(dataset,bbs,type_features):
                     i = i+1
                     np.save('tmp',features)
                     np.save('tmp_i',i)
+            return features
     elif type_features=='i':
             network = tf.Graph()
             with network.as_default():
@@ -148,6 +147,7 @@ def get_features(dataset,bbs,type_features):
                     i = i+1
                     np.save('tmp',features)
                     np.save('tmp_i',i)
+            return features
     elif type_features == 'ie':
             network = tf.Graph()
             with network.as_default():
@@ -181,8 +181,6 @@ def get_features(dataset,bbs,type_features):
                     _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b['min_x'],bb_ymin:b['min_y'],bb_xmax:b['max_x'],bb_ymax:b['max_y']})   
                     l = np.squeeze(np.asarray(l))
                     feat = list(l)
-                    features.append(feat)
-                    print(feat[16],img_p)
                     try:
                         _,_,_,l = sess.run([im_decode,im,pr_im,logits],feed_dict={img:img_p,bb_xmin:b_i['min_x'],bb_ymin:b_i['min_y'],bb_xmax:b_i['max_x'],bb_ymax:b_i['max_y']})   
                         l = np.squeeze(np.asarray(l))
@@ -192,6 +190,7 @@ def get_features(dataset,bbs,type_features):
                         l = np.squeeze(np.asarray(l))
                         feat = feat + list(l)
                     i = i+1
+                    features.append(feat)
                     np.save('tmp',features)
                     np.save('tmp_i',i)
             return features 

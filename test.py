@@ -5,9 +5,9 @@ import matplotlib.image as mpimg
 from utils import functions as f
 import time
 
-features = np.load('features_e.npy')
-imgs = np.load('im_list_e.npy')
-dists = np.load('dist_e.npy')
+features = np.load('features_ie.npy')
+imgs = np.load('im_list_ie.npy')
+dists = np.load('dist_ie.npy')
 
 def all_class_test(features,imgs,dists):
     good_pos = []
@@ -60,10 +60,10 @@ def all_class_test(features,imgs,dists):
     ax.text(len(first_pos)/2, 0.7, u'AUC : ' + str(auc),
        bbox={'facecolor':'red', 'alpha':0.2, 'pad':10})
 
-    plt.show()
-    #plt.pause(1)
-    #raw_input("<Hit Enter To Close>")
-    #plt.close()
+    plt.draw()
+    plt.pause(1)
+    raw_input("<Hit Enter To Close>")
+    plt.close()
 
 
 
@@ -88,7 +88,6 @@ def separate_class_test(features,imgs,dists):
 
     first_pos = [g[0] for g in good_pos]
     imgs_good = list(set(imgs)-set(no_img))
-    print(len(no_img),len(imgs),len(imgs_good))
     indexes = []
     indexes.append([i for im,i in zip(imgs_good,range(0,len(imgs_good))) if 'Pantaloni' in im ])
     indexes.append([i for im,i in zip(imgs_good,range(0,len(imgs_good))) if 'Gonne' in im ])
@@ -135,15 +134,15 @@ def separate_class_test(features,imgs,dists):
         'Camicie - AUC: '+ str(aucs[3]),'Maglie - AUC: '+ str(aucs[4]),'Vestiti - AUC: '+ str(aucs[5])])
 
 
-    plt.show()
-    #plt.pause(1)
-    #raw_input("<Hit Enter To Close>")
-    #plt.close()
+    plt.draw()
+    plt.pause(1)
+    raw_input("<Hit Enter To Close>")
+    plt.close()
 
 
 
 separate_class_test(features,imgs,dists)
-#all_class_test(features,imgs,dists)
+all_class_test(features,imgs,dists)
 #print(features.shape)
 """
 
