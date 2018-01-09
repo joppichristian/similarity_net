@@ -8,7 +8,7 @@ import time
 features = np.load('features_e.npy')
 imgs = np.load('im_list_e.npy')
 dists = np.load('dist_e.npy')
-net_name = "InceptionV4"
+net_name = "Inception ResNet V2"
 
 
 def all_class_test(features,imgs,dists):

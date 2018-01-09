@@ -40,31 +40,6 @@ def load_data(root_imgs,root_bbs):
 
 
 
-def test_crop(dataset,bbs):
-    i=1
-    t1 = time.time()
-    for img,bb in zip(dataset,bbs):
-        print(i,img)
-        bbs_inside = bb['bb_inside']
-        bbs_outside = bb['bb']
-        with tf.Graph().as_default():
-            im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
-            try:
-                im = tf.image.crop_to_bounding_box(im_decode,bbs_inside['min_y'],bbs_inside['min_x'],bbs_inside['max_y']-bbs_inside['min_y'],bbs_inside['max_x']-bbs_inside['min_x'])
-                with tf.Session(config=config) as sess:
-                    im_decode = sess.run(im_decode)
-                    im = sess.run(im)
-            except:
-                print("Errore di croping")
-                im = tf.image.crop_to_bounding_box(im_decode,bbs_outside['min_y'],bbs_outside['min_x'],bbs_outside['max_y']-bbs_outside['min_y'],bbs_outside['max_x']-bbs_outside['min_x'])
-                with tf.Session(config=config) as sess:
-                    im_decode = sess.run(im_decode)
-                    im = sess.run(im)
-        i=i+1
-    t = time.time() - t1
-    print(t1)
-
-
 def get_features(dataset,bbs,type_features):
 
     url = "http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz"
