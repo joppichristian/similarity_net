@@ -5,9 +5,11 @@ import matplotlib.image as mpimg
 from utils import functions as f
 import time
 
-features = np.load('features_ie.npy')
-imgs = np.load('im_list_ie.npy')
-dists = np.load('dist_ie.npy')
+features = np.load('features_e.npy')
+imgs = np.load('im_list_e.npy')
+dists = np.load('dist_e.npy')
+net_name = "InceptionV4"
+
 
 def all_class_test(features,imgs,dists):
     good_pos = []
@@ -47,7 +49,7 @@ def all_class_test(features,imgs,dists):
 
     ax = fig.add_subplot(111)
     fig.subplots_adjust(top=0.85)
-    ax.set_title('VGG16 -- K='+str(K))
+    ax.set_title(net_name + ' -- K='+str(K))
 
     ax.set_xlabel('k')
     ax.set_ylabel('accuracy')
@@ -116,7 +118,7 @@ def separate_class_test(features,imgs,dists):
 
     ax = fig.add_subplot(111)
     fig.subplots_adjust(top=0.85)
-    ax.set_title('VGG16 -- K='+str(K))
+    ax.set_title(net_name + ' -- K='+str(K))
 
     ax.set_xlabel('k')
     ax.set_ylabel('accuracy')

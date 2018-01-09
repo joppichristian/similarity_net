@@ -5,8 +5,9 @@ import os, json
 import tensorflow as tf
 import urllib3
 from nets import vgg
+from nets import inceptionV4
 from shutil import copyfile
-from preprocessing import vgg_preprocessing
+from preprocessing import inception_preprocessing
 import matplotlib.patches as patches
 from sklearn.metrics import auc
 import time
@@ -63,12 +64,13 @@ def test_crop(dataset,bbs):
     t = time.time() - t1
     print(t1)
 
+
 def get_features(dataset,bbs,type_features):
 
     url = "http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz"
     checkpoints_dir = 'model'
     slim = tf.contrib.slim
-    im_size = vgg.vgg_16.default_image_size
+    im_size = inceptionV4.inception_v4.default_image_size
     features = []
     if type_features=='e':
             network = tf.Graph()
@@ -78,19 +80,19 @@ def get_features(dataset,bbs,type_features):
                 bb_ymin = tf.placeholder(tf.int32)
                 bb_xmax = tf.placeholder(tf.int32)
                 bb_ymax = tf.placeholder(tf.int32)
-                im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
+                im_decode = tf.image.decode_jpeg(tf.read_file(img),channels=3)
                 im = tf.image.crop_to_bounding_box(im_decode,bb_ymin,bb_xmin,bb_ymax-bb_ymin,bb_xmax-bb_xmin)
-                pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
+                pr_im = inception_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
                 pr_im  = tf.expand_dims(pr_im, 0)
                 
-                with slim.arg_scope(vgg.vgg_arg_scope()):
-                    logits, _ = vgg.vgg_16(pr_im,
+                with slim.arg_scope(inceptionV4.inception_v4_arg_scope()):
+                    logits, _ = inceptionV4.inception_v4(pr_im,
                                     num_classes=0,
                                     is_training=False)
                 
                 init_fn = slim.assign_from_checkpoint_fn(
-                os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
-                slim.get_model_variables('vgg_16'))
+                os.path.join(checkpoints_dir, 'inception_v4.ckpt'),
+                slim.get_model_variables())
 
             with tf.Session(graph=network) as sess:
                 i = 1
@@ -114,20 +116,20 @@ def get_features(dataset,bbs,type_features):
                 bb_ymin = tf.placeholder(tf.int32)
                 bb_xmax = tf.placeholder(tf.int32)
                 bb_ymax = tf.placeholder(tf.int32)
-                im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
+                im_decode = tf.image.decode_jpeg(tf.read_file(img),channels=3)
                 im = tf.image.crop_to_bounding_box(im_decode,bb_ymin,bb_xmin,bb_ymax-bb_ymin,bb_xmax-bb_xmin)
-                pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
+                pr_im = inception_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
                 pr_im  = tf.expand_dims(pr_im, 0)
                 
-                with slim.arg_scope(vgg.vgg_arg_scope()):
-                    logits, _ = vgg.vgg_16(pr_im,
+                with slim.arg_scope(inceptionV4.inception_v4_arg_scope()):
+                    logits, _ = inceptionV4.inception_v4(pr_im,
                                     num_classes=0,
                                     is_training=False)
                 
                 init_fn = slim.assign_from_checkpoint_fn(
-                os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
-                slim.get_model_variables('vgg_16'))
-
+                os.path.join(checkpoints_dir, 'inception_v4.ckpt'),
+                slim.get_model_variables())
+                
             with tf.Session(graph=network) as sess:
                 i = 1
                 sess.run(tf.global_variables_initializer())
@@ -156,19 +158,21 @@ def get_features(dataset,bbs,type_features):
                 bb_ymin = tf.placeholder(tf.int32)
                 bb_xmax = tf.placeholder(tf.int32)
                 bb_ymax = tf.placeholder(tf.int32)
-                im_decode = tf.image.decode_image(tf.read_file(img),channels=3)
+                im_decode = tf.image.decode_jpeg(tf.read_file(img),channels=3)
                 im = tf.image.crop_to_bounding_box(im_decode,bb_ymin,bb_xmin,bb_ymax-bb_ymin,bb_xmax-bb_xmin)
-                pr_im = vgg_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
+                pr_im = inception_preprocessing.preprocess_image(im,im_size, im_size,is_training=False)
                 pr_im  = tf.expand_dims(pr_im, 0)
                 
-                with slim.arg_scope(vgg.vgg_arg_scope()):
-                    logits, _ = vgg.vgg_16(pr_im,
+                with slim.arg_scope(inceptionV4.inception_v4_arg_scope()):
+                    logits, _ = inceptionV4.inception_v4(pr_im,
                                     num_classes=0,
                                     is_training=False)
                 
                 init_fn = slim.assign_from_checkpoint_fn(
-                os.path.join(checkpoints_dir, 'vgg_16.ckpt'),
-                slim.get_model_variables('vgg_16'))
+                os.path.join(checkpoints_dir, 'inception_v4.ckpt'),
+                slim.get_model_variables())
+                
+
 
             with tf.Session(graph=network) as sess:
                 i = 1       

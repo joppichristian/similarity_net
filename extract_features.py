@@ -1,4 +1,4 @@
-from utils import functions as f
+from utils import functions_incV4 as f
 import numpy as np
 from scipy.spatial.distance import cdist
 
@@ -6,14 +6,14 @@ from scipy.spatial.distance import cdist
 
 
 imgs,json_dataset = f.load_data('../DatasetNL','../DatasetNL/results')
-
+"""
 feats = f.get_features(imgs,json_dataset,'ie')
 dists = cdist(feats,feats,'cosine')
 
 np.save('dist_ie.npy',dists)
 np.save('features_ie.npy',feats)
 np.save('im_list_ie.npy',imgs)
-
+"""
 
 feats = f.get_features(imgs,json_dataset,'i')
 dists = cdist(feats,feats,'cosine')
