@@ -5,10 +5,10 @@ import matplotlib.image as mpimg
 from utils import functions_incresnet as f
 import time
 
-features = np.load('feats_incresnet/features_ie.npy')
-imgs = np.load('feats_incresnet/im_list_ie.npy')
-dists = np.load('feats_incresnet/dist_ie.npy')
-net_name = "Inception ResNet V2"
+features = np.load('feats_incresnet/features_e.npy')
+imgs = np.load('feats_incresnet/im_list_e.npy')
+dists = np.load('feats_incresnet/dist_e.npy')
+
 
 
 def test(features,imgs,dists):
