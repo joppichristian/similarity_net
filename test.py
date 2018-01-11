@@ -2,12 +2,12 @@ from scipy.spatial.distance import cdist
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-from utils import functions as f
+from utils import functions_incresnet as f
 import time
 
-features = np.load('features_e.npy')
-imgs = np.load('im_list_e.npy')
-dists = np.load('dist_e.npy')
+features = np.load('features_ie.npy')
+imgs = np.load('im_list_ie.npy')
+dists = np.load('dist_ie.npy')
 net_name = "Inception ResNet V2"
 
 
