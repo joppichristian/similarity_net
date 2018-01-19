@@ -5,11 +5,10 @@ import matplotlib.image as mpimg
 from utils import functions_incresnet as f
 import time
 
-features = np.load('features_ie.npy')
-imgs = np.load('im_list_ie.npy')
-dists = np.load('dist_ie.npy')
+features = np.load('feats_incresnet/features_e.npy')
+imgs = np.load('feats_incresnet/im_list_e.npy')
+dists = np.load('feats_incresnet/dist_ham_e.npy')
 net_name = "Inception ResNet V2"
-
 
 def all_class_test(features,imgs,dists):
     good_pos = []
@@ -43,7 +42,7 @@ def all_class_test(features,imgs,dists):
     acc, auc = f.cmc(first_pos,K)
     auc = round(auc/len(first_pos),4)
 
-
+   
     fig = plt.figure()
     fig.suptitle('CMC' , fontsize=14, fontweight='bold')
 
@@ -62,10 +61,48 @@ def all_class_test(features,imgs,dists):
     ax.text(len(first_pos)/2, 0.7, u'AUC : ' + str(auc),
        bbox={'facecolor':'red', 'alpha':0.2, 'pad':10})
 
+    plt.show()
+    """
     plt.draw()
     plt.pause(1)
     raw_input("<Hit Enter To Close>")
     plt.close()
+    
+    
+    im_ind = 1515
+    print(good_pos[im_ind])
+
+    ranking_index = np.argsort(dists[im_ind,:])
+    print(imgs[im_ind])
+    print(imgs[ranking_index[1:5]])
+
+
+
+    fig = plt.figure()
+    a=fig.add_subplot(1,6,1)
+    plt.imshow(mpimg.imread(imgs[im_ind]))
+    plt.title('Original Image')
+    plt.axis('off')
+    a.plot([1.1, 1.1], [0, 1], transform=a.transAxes, clip_on=False)
+    a=fig.add_subplot(1,6,2)
+    plt.imshow(mpimg.imread(imgs[ranking_index[1]]))
+    plt.title('More Similar')
+    plt.axis('off')
+    a=fig.add_subplot(1,6,3)
+    plt.imshow(mpimg.imread(imgs[ranking_index[2]]))
+    plt.axis('off')
+    a=fig.add_subplot(1,6,4)
+    plt.imshow(mpimg.imread(imgs[ranking_index[3]]))
+    plt.axis('off')
+    a=fig.add_subplot(1,6,5)
+    plt.imshow(mpimg.imread(imgs[ranking_index[4]]))
+    plt.axis('off')
+    a=fig.add_subplot(1,6,6)
+    plt.imshow(mpimg.imread(imgs[ranking_index[5]]))
+    plt.title('Less Similar')
+    plt.axis('off')
+    plt.show()
+ """
 
 
 
@@ -143,34 +180,11 @@ def separate_class_test(features,imgs,dists):
 
 
 
-separate_class_test(features,imgs,dists)
+#separate_class_test(features,imgs,dists)
 all_class_test(features,imgs,dists)
-#print(features.shape)
-"""
-
-
-im_ind = 17
-print(good_pos[im_ind])
-
-ranking_index = np.argsort(dists[im_ind,:])
-print(imgs[im_ind])
-print(imgs[ranking_index[1:5]])
 
 
 
-fig = plt.figure()
-a=fig.add_subplot(1,6,1)
-plt.imshow(mpimg.imread(imgs[im_ind]))
-a=fig.add_subplot(1,6,2)
-plt.imshow(mpimg.imread(imgs[ranking_index[1]]))
-a=fig.add_subplot(1,6,3)
-plt.imshow(mpimg.imread(imgs[ranking_index[2]]))
-a=fig.add_subplot(1,6,4)
-plt.imshow(mpimg.imread(imgs[ranking_index[3]]))
-a=fig.add_subplot(1,6,5)
-plt.imshow(mpimg.imread(imgs[ranking_index[4]]))
-a=fig.add_subplot(1,6,6)
-plt.imshow(mpimg.imread(imgs[ranking_index[5]]))
-plt.show()
-
-"""
+#1950 gonne
+#1570 camicie
+#1400 pantaloni
