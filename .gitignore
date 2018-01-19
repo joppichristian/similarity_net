@@ -3,4 +3,14 @@ model
 tmp*.npy
 *.pyc
 .vscode
-*DS*
+*byCat
+feats*/*ham*
+
+
+graphics/inc_resnet/
+
+graphics/vgg16/
+
+graphics/\.DS_Store
+
+\.DS_Store
