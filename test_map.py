@@ -5,9 +5,9 @@ import matplotlib.image as mpimg
 from utils import functions_incresnet as f
 import time
 
-features = np.load('feats_incresnet/features_e.npy')
-imgs = np.load('feats_incresnet/im_list_e.npy')
-dists = np.load('feats_incresnet/dist_e.npy')
+features = np.load('feats_resnet152/features_e.npy')
+imgs = np.load('feats_resnet152/im_list_e.npy')
+dists = np.load('feats_resnet152/dist_e.npy')
 
 
 
@@ -41,17 +41,18 @@ def test(features,imgs,dists):
 
     maps = []
     maps_tot = []
+
     for ind in indexes:
-    	means_acc_pr = []
-    	for g,i in zip(good_pos,range(0,len(good_pos))):
-		if i in ind:
-			tmp = 0.0
-			for gg,idx in zip(g,range(1,len(g)+1)):
-				tmp = tmp + float(idx)/(gg+1)
-			m_a_p = tmp/len(g)
-			maps_tot.append(m_a_p)
-			means_acc_pr.append(m_a_p)
-	mean_acc_precision=np.mean(means_acc_pr)
+        means_acc_pr = []
+        for g,i in zip(good_pos,range(0,len(good_pos))):
+            if i in ind:
+                tmp = 0.0
+                for gg,idx in zip(g,range(1,len(g)+1)):
+                    tmp = tmp + float(idx)/(gg+1)
+                m_a_p = tmp/len(g)
+                maps_tot.append(m_a_p)
+                means_acc_pr.append(m_a_p)
+            mean_acc_precision=np.mean(means_acc_pr)
         maps.append(mean_acc_precision)
     print('Pantaloni:' + str(maps[0]))
     print('Gonne:' + str(maps[1]))

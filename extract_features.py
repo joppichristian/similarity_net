@@ -1,4 +1,4 @@
-from utils import functions_incresnet as f
+from utils import functions_resnet as f
 import numpy as np
 from scipy.spatial.distance import cdist
 

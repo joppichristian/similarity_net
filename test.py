@@ -5,10 +5,10 @@ import matplotlib.image as mpimg
 from utils import functions_incresnet as f
 import time
 
-features = np.load('feats_incresnet/features_e.npy')
-imgs = np.load('feats_incresnet/im_list_e.npy')
-dists = np.load('feats_incresnet/dist_ham_e.npy')
-net_name = "Inception ResNet V2"
+features = np.load('feats_resnet152/features_e.npy')
+imgs = np.load('feats_resnet152/im_list_e.npy')
+dists = np.load('feats_resnet152/dist_e.npy')
+net_name = "ResNet152 V1"
 
 def all_class_test(features,imgs,dists):
     good_pos = []
@@ -172,15 +172,16 @@ def separate_class_test(features,imgs,dists):
     plt.legend(plots,['Pantaloni - AUC: '+ str(aucs[0]) ,'Gonne - AUC: '+ str(aucs[1]) ,'Giacche - AUC: '+ str(aucs[2]),
         'Camicie - AUC: '+ str(aucs[3]),'Maglie - AUC: '+ str(aucs[4]),'Vestiti - AUC: '+ str(aucs[5])])
 
-
+    """
     plt.draw()
     plt.pause(1)
     raw_input("<Hit Enter To Close>")
     plt.close()
+    """
+    plt.show()
 
 
-
-#separate_class_test(features,imgs,dists)
+separate_class_test(features,imgs,dists)
 all_class_test(features,imgs,dists)
 
 

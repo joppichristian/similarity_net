@@ -1,0 +1,1 @@
+https://www.tensorflow.org/versions/r1.0/programmers_guide/variables
